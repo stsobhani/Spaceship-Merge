@@ -1,19 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<!-- add our space background -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/home_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:background="@drawable/space_background">
 
+    <!-- Add in title -->
     <TextView
+        android:id="@+id/title_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:text="SPACESHIP\nMERGE"
+        android:textColor="@android:color/white"
+        android:textSize="40sp"
+        android:gravity="center"
+        android:fontFamily="@font/press_start_2p"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="48dp" />
+    <!-- Add in an image of gameplay perhaps -->
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+        android:id="@+id/username_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Username: TBD"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:fontFamily="@font/press_start_2p"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/title_text"
+        android:layout_marginTop="32dp" />
+
+    <TextView
+        android:id="@+id/high_score_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Current High Score: 0"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:fontFamily="@font/press_start_2p"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/username_text"
+        android:layout_marginTop="10dp" />
+
+    <!-- View leaderboard button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/leaderboard_button"
+        android:text="View Leaderboard"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_below="@id/high_score_text"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="32dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:textColor="@android:color/white"
+        android:backgroundTint="@color/turquoise"
+        app:strokeColor="@color/red"
+        app:strokeWidth="3dp"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        android:fontFamily="@font/space_grotesk_medium"
+        android:textSize="24sp"
+        android:gravity="center" />
+
+    <!-- Tutorial button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/tutorial_button"
+        android:text="View Tutorial"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_below="@id/leaderboard_button"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:textColor="@android:color/white"
+        android:backgroundTint="@color/turquoise"
+        app:strokeColor="@color/red"
+        app:strokeWidth="3dp"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        android:fontFamily="@font/space_grotesk_medium"
+        android:textSize="24sp"
+        android:gravity="center" />
+
+    <!-- Play new game button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/play_button"
+        android:text="Play New Game"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_below="@id/tutorial_button"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:textColor="@android:color/white"
+        android:backgroundTint="@color/turquoise"
+        app:strokeColor="@color/red"
+        app:strokeWidth="3dp"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        android:fontFamily="@font/space_grotesk_medium"
+        android:textSize="24sp"
+        android:gravity="center" />
+
+    <!-- Layout manager for our ad view -->
+    <FrameLayout
+        android:id="@+id/ad_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+
+</RelativeLayout>
