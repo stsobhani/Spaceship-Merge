@@ -68,6 +68,7 @@ class MainActivity : AppCompatActivity() {
 
         // Make sticky mode off by default
         stickyModeSwitch.isChecked = false
+        var stickyMode = stickyModeSwitch.isChecked
 
         // Get shared prefs
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
@@ -114,10 +115,14 @@ class MainActivity : AppCompatActivity() {
         playButton.setOnClickListener {
             Log.d("MainActivity", "Play button clicked")
 
-            val stickyMode = stickyModeSwitch.isChecked
             val intent = Intent(this, GameActivity::class.java)
             intent.putExtra("sticky_mode_enabled", stickyMode)
             startActivity(intent)
+        }
+
+        // Sticky mode switch listener
+        stickyModeSwitch.setOnCheckedChangeListener { _, isChecked ->
+            stickyMode = isChecked
         }
 
         // Display tutorial pop-up
