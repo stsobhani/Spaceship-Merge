@@ -24,10 +24,15 @@ class GameView : View {
     private val shipBitmaps = mutableMapOf<Int, Bitmap>()
     private var shipRect : Rect? = null
 
+    private val background = BitmapFactory.decodeResource(resources, R.drawable.space_background)
+    private val scaledBackground : Bitmap
 
     constructor(context : Context, width : Int, height : Int) : super(context){
         this.width = width
         this.height = height
+
+        //Scales the background image to fill the screen
+        scaledBackground = Bitmap.createScaledBitmap(background, width, height, false)
 
         paint.isAntiAlias = true
 
@@ -52,8 +57,15 @@ class GameView : View {
 
         //Log.w("MainActivity", "Inside onDraw")
 
-        //Draw background color
-        canvas.drawColor(Color.BLACK)
+//        //Draw background color
+//        canvas.drawColor(Color.BLACK)
+
+        //Draw space image bitmap for background
+//        val background = BitmapFactory.decodeResource(resources, R.drawable.space_background)
+//        canvas.drawBitmap(background, 0f, 0f, null)
+
+//        val scaledBackground = Bitmap.createScaledBitmap(background, canvas.width, canvas.height, true)
+        canvas.drawBitmap(scaledBackground, 0f, 0f, null)
 
         //Retrieve all ships in the current state of the game
         val ships = spaceshipMerge.getShips()

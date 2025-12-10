@@ -3,9 +3,9 @@ package com.example.spaceship_merge
 import java.util.TimerTask
 
 class GameTimerTask : TimerTask {
-    private lateinit var activity : MainActivity
+    private lateinit var activity : GameActivity
 
-    constructor(activity : MainActivity){
+    constructor(activity : GameActivity){
         this.activity = activity
     }
 

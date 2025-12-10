@@ -96,8 +96,7 @@ class MainActivity : AppCompatActivity() {
         playButton.setOnClickListener {
             Log.d("MainActivity", "Play button clicked")
 
-            // TODO: Launch game screen
-            // startActivity(Intent(this, GameActivity::class.java))
+            startActivity(Intent(this, GameActivity::class.java))
         }
 
         // Display tutorial pop-up
