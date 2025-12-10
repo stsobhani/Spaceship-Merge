@@ -15,8 +15,19 @@ import android.widget.FrameLayout
 import com.google.android.material.button.MaterialButton
 import android.widget.TextView
 import android.widget.EditText
+import android.widget.Switch
 import androidx.appcompat.app.AlertDialog
 import android.content.SharedPreferences
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.GradientDrawable
+import android.view.Gravity
+import android.view.View
+import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.PopupWindow
+import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 
 class MainActivity : AppCompatActivity() {
 
@@ -26,6 +37,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tutorialButton : MaterialButton
     private lateinit var usernameText: TextView
     private lateinit var highScoreText: TextView
+    private lateinit var stickyModeSwitch: Switch
     private lateinit var adView: AdView
 
     companion object {
@@ -51,6 +63,12 @@ class MainActivity : AppCompatActivity() {
         usernameText = findViewById(R.id.username_text)
         highScoreText = findViewById(R.id.high_score_text)
 
+        // Instantiate switch
+        stickyModeSwitch = findViewById(R.id.sticky_mode_switch)
+
+        // Make sticky mode off by default
+        stickyModeSwitch.isChecked = false
+
         // Get shared prefs
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
 
@@ -72,7 +90,7 @@ class MainActivity : AppCompatActivity() {
         val adContainer = findViewById<FrameLayout>(R.id.ad_container)
 
         // Your test ad unit id
-        var adUnitId: String = "ca-app-pub-3940256099942544/6300978111"
+        val adUnitId: String = "ca-app-pub-3940256099942544/6300978111"
 
         // Create adView
         adView = AdView(this)
@@ -96,16 +114,98 @@ class MainActivity : AppCompatActivity() {
         playButton.setOnClickListener {
             Log.d("MainActivity", "Play button clicked")
 
-            startActivity(Intent(this, GameActivity::class.java))
+            val stickyMode = stickyModeSwitch.isChecked
+            val intent = Intent(this, GameActivity::class.java)
+            intent.putExtra("sticky_mode_enabled", stickyMode)
+            startActivity(intent)
         }
 
         // Display tutorial pop-up
         tutorialButton.setOnClickListener {
             Log.d("MainActivity", "Tutorial button clicked")
 
-            // TODO: Implement tutorial
-            // startActivity(Intent(this, GameActivity::class.java))
+            // Build content view for the popup
+            val context = this
+
+            // Outer container (for red border)
+            val outerLayout = LinearLayout(context).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(8, 8, 8, 8) // border thickness
+
+                background = GradientDrawable().apply {
+                    // Red border container
+                    setColor(ContextCompat.getColor(context, R.color.red))
+                    cornerRadius = 40f
+                }
+            }
+
+            // Inner layout (turquoise background)
+            val innerLayout = LinearLayout(context).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(32, 32, 32, 32)
+
+                background = GradientDrawable().apply {
+                    setColor(ContextCompat.getColor(context, R.color.turquoise))
+                    cornerRadius = 32f
+                }
+            }
+
+            // Tutorial text
+            val tutorialTextView = TextView(context).apply {
+                text = "HOW TO PLAY\n\n" +
+                        "• Tap to shoot a ship\n" +
+                        "• When two same-level ships touch, they merge\n" +
+                        "• Merging creates a higher-level ship\n" +
+                        "• Try to build the biggest ship\n" +
+                        "• Don’t let the board get too full!"
+                setTextColor(ContextCompat.getColor(context, R.color.white))
+                textSize = 14f
+                // If you want your retro font:
+                // typeface = ResourcesCompat.getFont(context, R.font.press_start_2p)
+            }
+
+            innerLayout.addView(
+                tutorialTextView,
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+            )
+
+            outerLayout.addView(
+                innerLayout,
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+            )
+
+            // Create the pop-up
+            val popupWidthDp = 300
+            val popupWidthPx = (popupWidthDp * resources.displayMetrics.density).toInt()
+
+            val popupWindow = PopupWindow(
+                outerLayout,
+                popupWidthPx,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                true  // focusable: allows back button / outside touch to dismiss
+            )
+
+            // Needed so outside touches dismiss the popup
+            popupWindow.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            popupWindow.isOutsideTouchable = true
+
+            // Log the pop-up
+            popupWindow.setOnDismissListener {
+                Log.d("MainActivity", "Tutorial popup dismissed")
+            }
+
+            // Position the pop-up
+            val rootView = findViewById<View>(R.id.home_root)
+            popupWindow.showAtLocation(rootView, Gravity.CENTER, 0, -510)
+
         }
+
     }
 
     private fun createUsername(prefs: SharedPreferences) {

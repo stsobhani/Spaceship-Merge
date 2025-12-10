@@ -21,7 +21,18 @@
         android:fontFamily="@font/press_start_2p"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="48dp" />
-    <!-- Add in an image of gameplay perhaps -->
+
+    <!-- Spaceship picture -->
+    <ImageView
+        android:id="@+id/ship_1_larger"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:layout_below="@id/title_text"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="1dp"
+        android:src="@drawable/ship1"
+        android:adjustViewBounds="true"
+        android:scaleType="centerInside" />
 
     <TextView
         android:id="@+id/username_text"
@@ -33,8 +44,8 @@
         android:gravity="center"
         android:fontFamily="@font/press_start_2p"
         android:layout_centerHorizontal="true"
-        android:layout_below="@id/title_text"
-        android:layout_marginTop="32dp" />
+        android:layout_below="@id/ship_1_larger"
+        android:layout_marginTop="1dp" />
 
     <TextView
         android:id="@+id/high_score_text"
@@ -47,7 +58,7 @@
         android:fontFamily="@font/press_start_2p"
         android:layout_centerHorizontal="true"
         android:layout_below="@id/username_text"
-        android:layout_marginTop="10dp" />
+        android:layout_marginTop="0dp" />
 
     <!-- View leaderboard button -->
     <com.google.android.material.button.MaterialButton
@@ -78,7 +89,7 @@
         android:layout_height="60dp"
         android:layout_below="@id/leaderboard_button"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="24dp"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
         android:textColor="@android:color/white"
@@ -99,7 +110,7 @@
         android:layout_height="60dp"
         android:layout_below="@id/tutorial_button"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="24dp"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
         android:textColor="@android:color/white"
@@ -111,6 +122,35 @@
         android:fontFamily="@font/space_grotesk_medium"
         android:textSize="24sp"
         android:gravity="center" />
+
+    <!-- Sticky mode label + switch -->
+    <LinearLayout
+        android:id="@+id/sticky_mode_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_below="@id/play_button"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="32dp">
+
+        <TextView
+            android:id="@+id/sticky_mode_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sticky Mode"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:fontFamily="@font/press_start_2p"
+            android:layout_marginEnd="12dp" />
+
+        <Switch
+            android:id="@+id/sticky_mode_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:thumbTint="@color/white"
+            android:trackTint="@color/white" />
+    </LinearLayout>
 
     <!-- Layout manager for our ad view -->
     <FrameLayout
