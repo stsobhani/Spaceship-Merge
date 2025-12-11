@@ -29,6 +29,9 @@ class GameActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        // read sticky mode option
+        val stickyModeEnabled = intent.getBooleanExtra("sticky_mode_enabled", false)
+
         // hide top and bottom bars
         val windowInsetsController : WindowInsetsControllerCompat = WindowCompat.getInsetsController(window, window.decorView)
         windowInsetsController.hide( 	WindowInsetsCompat.Type.systemBars() )
@@ -39,10 +42,9 @@ class GameActivity : AppCompatActivity() {
         gameView = GameView( this, width, height)
         setContentView(gameView)
 
-
-
         spaceshipMerge = gameView.getSpaceshipMerge()
 
+        spaceshipMerge.useStickyMode(stickyModeEnabled)
 
         // Set up event handling
         var th : TouchHandler = TouchHandler()
