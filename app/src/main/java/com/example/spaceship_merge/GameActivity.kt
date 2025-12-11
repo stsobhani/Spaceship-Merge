@@ -12,6 +12,11 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import java.util.Timer
+import android.net.Uri
+import android.util.Log
+import com.example.spaceship_merge.MainActivity.Companion.PREFS_NAME
+import com.example.spaceship_merge.MainActivity.Companion.USERNAME_KEY
+import com.example.spaceship_merge.MainActivity.Companion.HIGH_SCORE_KEY
 
 class GameActivity : AppCompatActivity() {
     private lateinit var gameView : GameView
@@ -128,9 +133,39 @@ class GameActivity : AppCompatActivity() {
             .setNegativeButton("Return Home"){_, _ ->
                 returnHome()
             }
+            .setNeutralButton("Share Score") { _, _ -> sendScoreByEmail()
+            }
             .create()
 
         dialog.show()
+    }
+
+    private fun sendScoreByEmail() {
+        Log.d("Email", "In the email function")
+
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val username = prefs.getString(USERNAME_KEY, "")
+        val score = prefs.getInt(HIGH_SCORE_KEY, 0)
+
+        val subject = "Spaceship Merge - My High Score!"
+        val body = """
+        Hey,
+
+        I just scored $score points in Spaceship Merge 🚀
+        Username: $username
+
+        Can you beat my score?
+
+        - $username
+    """.trimIndent()
+
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"  // <-- allows ANY share app (SMS, Discord, Gmail, Notes, etc.)
+            putExtra(Intent.EXTRA_SUBJECT, subject)
+            putExtra(Intent.EXTRA_TEXT, body)
+        }
+
+        startActivity(Intent.createChooser(intent, "Share your score"))
     }
 
     private fun returnHome(){
