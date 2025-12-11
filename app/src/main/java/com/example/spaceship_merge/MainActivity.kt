@@ -107,8 +107,8 @@ class MainActivity : AppCompatActivity() {
         leaderboardButton.setOnClickListener {
             Log.d("MainActivity", "Leaderboard button clicked")
 
-            // TODO: Launch leaderboard screen
-            // startActivity(Intent(this, LeaderboardActivity::class.java))
+            val intent = Intent(this, LeaderboardActivity::class.java)
+            startActivity(intent)
         }
 
         // Switch to game screen
