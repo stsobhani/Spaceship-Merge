@@ -113,12 +113,19 @@ class GameActivity : AppCompatActivity() {
         gameTimer.purge()
         gameInProgress = false
 
-        spaceshipMerge.updateHighScore()
-
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        val score = prefs.getInt(HIGH_SCORE_KEY, 0)
-        Log.d("GameActivity", "endGame: high score from prefs = $score")
-        updateLeaderboardIfTop10(score)
+        val oldHigh : Int = prefs.getInt(HIGH_SCORE_KEY, 0)
+        val newHigh : Int = spaceshipMerge.updateHighScore()  // <- we will modify this function too
+
+        Log.d("GameActivity", "oldHigh=$oldHigh newHigh=$newHigh")
+
+        // Only push to leaderboard if the newHigh is actually higher than the old one
+        if (newHigh > oldHigh) {
+            Log.d("GameActivity", "New real high score detected → updating leaderboard")
+            updateLeaderboardIfTop10(newHigh)
+        } else {
+            Log.d("GameActivity", "Not a real high score → skipping leaderboard update")
+        }
 
 
         runOnUiThread{showGameOverDialog()}

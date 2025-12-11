@@ -247,19 +247,20 @@ class SpaceshipMerge {
         return gameOver
     }
 
-    fun updateHighScore(){
-        if(!gameOver) return
+    fun updateHighScore(): Int {
+        if (!gameOver) return 0   // or return currentScore if you prefer
 
-        //Get shared prefs
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val oldHigh = prefs.getInt(HIGH_SCORE_KEY, 0)
 
-        //Set high score text
-        val savedHighScore = prefs.getInt(HIGH_SCORE_KEY, 0)
-
-        if(currentScore > savedHighScore){
+        val newHigh = if (currentScore > oldHigh) {
             prefs.edit().putInt(HIGH_SCORE_KEY, currentScore).apply()
+            currentScore
+        } else {
+            oldHigh
         }
 
+        return newHigh
     }
 
     private fun calculateGridCellSize() : Float {
