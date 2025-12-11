@@ -1,8 +1,5 @@
 package com.example.spaceship_merge
 
-/* files changed: added fonts dir and several fonts, added space_background.png, edited gradle, manifest, colors, activity main, main activity */
-
-// imports
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -41,9 +38,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adView: AdView
 
     companion object {
+        // Shared preferences
         const val PREFS_NAME = "prefs"
         const val USERNAME_KEY = "username"
         const val HIGH_SCORE_KEY = "high_score"
+        // the max length for username
         private const val USERNAME_MAX_LEN = 15
     }
 
@@ -51,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Initialize google mobile ads SDK
+        // Initialize google mobile ads!!
         MobileAds.initialize(this) {}
 
         // Instantiate buttons
@@ -66,31 +65,31 @@ class MainActivity : AppCompatActivity() {
         // Instantiate switch
         stickyModeSwitch = findViewById(R.id.sticky_mode_switch)
 
-        // Make sticky mode off by default
+        // Makes sticky mode off by default
         stickyModeSwitch.isChecked = false
         var stickyMode = stickyModeSwitch.isChecked
 
         // Get shared prefs
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
 
-        // Set high score text
+        // Set the high score text
         val savedHighScore = prefs.getInt(HIGH_SCORE_KEY, 0)
         val savedHighScoreString = savedHighScore.toString()
         highScoreText.text = "Current High Score: $savedHighScoreString"
 
-        // Create username if needed, set username text
+        // create username if needed, set username text
         val savedUsername = prefs.getString("username", null)
         if (savedUsername.isNullOrBlank()) {
-            // No username yet → force user to create one
+            // Forces user to make!
             createUsername(prefs)
         } else {
             usernameText.text = "Username: $savedUsername"
         }
 
-        // Get layout manager for add
+        // Setsup the banner ad
         val adContainer = findViewById<FrameLayout>(R.id.ad_container)
 
-        // Your test ad unit id
+        // The test ad!!
         val adUnitId: String = "ca-app-pub-3940256099942544/6300978111"
 
         // Create adView
@@ -99,52 +98,51 @@ class MainActivity : AppCompatActivity() {
         adView.adUnitId = adUnitId
         adContainer.addView(adView)
 
-        // build/load the ad request
+        // Loads the advertisement
         val adRequest: AdRequest = AdRequest.Builder().build()
         adView.loadAd(adRequest)
 
-        // Switch to leaderboard screen
+        // Switches to leaderboard screen
         leaderboardButton.setOnClickListener {
-            Log.d("MainActivity", "Leaderboard button clicked")
+            Log.w("MainActivity", "Leaderboard button clicked")
 
             val intent = Intent(this, LeaderboardActivity::class.java)
             startActivity(intent)
         }
-
-        // Switch to game screen
+        // Switches to the game
         playButton.setOnClickListener {
-            Log.d("MainActivity", "Play button clicked")
+            Log.w("MainActivity", "Play button clicked")
 
             val intent = Intent(this, GameActivity::class.java)
             intent.putExtra("sticky_mode_enabled", stickyMode)
             startActivity(intent)
         }
 
-        // Sticky mode switch listener
+        // sticky mode listener
         stickyModeSwitch.setOnCheckedChangeListener { _, isChecked ->
             stickyMode = isChecked
         }
 
-        // Display tutorial pop-up
+        // display tutorial popup
         tutorialButton.setOnClickListener {
-            Log.d("MainActivity", "Tutorial button clicked")
+            Log.w("MainActivity", "Tutorial button clicked")
 
             // Build content view for the popup
             val context = this
 
-            // Create red border
+            // makes the red broder
             val outerLayout = LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
-                setPadding(8, 8, 8, 8) // border thickness
+                setPadding(8, 8, 8, 8)
 
                 background = GradientDrawable().apply {
-                    // Red border container
+                    // sets the container!
                     setColor(ContextCompat.getColor(context, R.color.red))
                     cornerRadius = 40f
                 }
             }
 
-            // Main area
+            // creates the inner layout for the content area
             val innerLayout = LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
                 setPadding(32, 32, 32, 32)
@@ -155,7 +153,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            // Tutorial text
+            // The tutorial text
             val tutorialTextView = TextView(context).apply {
                 text = "HOW TO PLAY\n\n" +
                         "• Tap to shoot a ship\n" +
@@ -166,7 +164,6 @@ class MainActivity : AppCompatActivity() {
                 setTextColor(ContextCompat.getColor(context, R.color.white))
                 textSize = 14f
             }
-
             innerLayout.addView(
                 tutorialTextView,
                 LinearLayout.LayoutParams(
@@ -174,7 +171,7 @@ class MainActivity : AppCompatActivity() {
                     LinearLayout.LayoutParams.WRAP_CONTENT
                 )
             )
-
+            // Adds the inner to outer layout!!
             outerLayout.addView(
                 innerLayout,
                 LinearLayout.LayoutParams(
@@ -182,8 +179,7 @@ class MainActivity : AppCompatActivity() {
                     LinearLayout.LayoutParams.WRAP_CONTENT
                 )
             )
-
-            // Create the pop-up
+            // Create the popup window
             val popupWidthDp = 300
             val popupWidthPx = (popupWidthDp * resources.displayMetrics.density).toInt()
 
@@ -191,33 +187,30 @@ class MainActivity : AppCompatActivity() {
                 outerLayout,
                 popupWidthPx,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                true  // focusable: allows back button / outside touch to dismiss
+                true
             )
 
-            // Needed so outside touches dismiss the popup
+            // Makes the touches work
             popupWindow.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             popupWindow.isOutsideTouchable = true
 
-            // Log the pop-up
+            // Logs the popup
             popupWindow.setOnDismissListener {
-                Log.d("MainActivity", "Tutorial popup dismissed")
+                Log.w("MainActivity", "Tutorial popup dismissed")
             }
-
-            // Position the pop-up
+            // centers the popup
             val rootView = findViewById<View>(R.id.home_root)
             popupWindow.showAtLocation(rootView, Gravity.CENTER, 0, -510)
-
         }
-
     }
-
+    // Shows the prompt to create the username!
     private fun createUsername(prefs: SharedPreferences) {
 
-        // create edit text for user to enter their username
+        // create edit text to enter username
         val input = EditText(this)
-        input.hint = "Enter username (max $USERNAME_MAX_LEN chars)"
+        input.hint = "Enter username (max $USERNAME_MAX_LEN characters!!)"
 
-        // build the alert dialog
+        // builds alert dialog
         val dialog = AlertDialog.Builder(this)
             .setTitle("Create Username")
             .setView(input)
@@ -227,32 +220,28 @@ class MainActivity : AppCompatActivity() {
 
         // set listener to our dialog
         dialog.setOnShowListener {
-
-            // set listener to the button on the dialog
+            // Sets listener to button on dialog
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
 
-                // format input given
+                // Trims the entered name
                 val name = input.text.toString().trim()
 
-                // check the input string to make sure it is 1-15 chars
+                // Checks if valid length
                 if (name.isEmpty()) input.error = "Username cannot be empty"
                 else if (name.length > USERNAME_MAX_LEN) input.error = "Must be $USERNAME_MAX_LEN characters or less"
 
-                // handle valid strings
+                // Ssername is good!
                 else {
-                    // update prefs
+                    // Saves the username to shared preferences
                     prefs.edit().putString(USERNAME_KEY, name).apply()
-
-                    // update username text
+                    //Updates the text
                     usernameText.text = "Username: $name"
-
-                    // remove dialog
+                    // Closes the dialog
                     dialog.dismiss()
                 }
             }
         }
-
-        // show dialog
+        // Shows the dialog
         dialog.show()
     }
 }

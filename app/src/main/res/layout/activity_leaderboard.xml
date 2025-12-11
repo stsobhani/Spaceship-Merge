@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/space_background">
 
-    <!-- Title -->
+    <!-- Title Section -->
     <TextView
         android:id="@+id/leaderboard_title"
         android:layout_width="wrap_content"
@@ -17,7 +17,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="48dp" />
 
-    <!-- Back button -->
+    <!-- Back Button -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/back_button"
         android:layout_width="wrap_content"
@@ -35,7 +35,7 @@
         android:fontFamily="@font/space_grotesk_medium"
         android:textSize="18sp" />
 
-    <!-- Scrollable area with 10 boxes -->
+    <!-- The ten scores -->
     <ScrollView
         android:id="@+id/leaderboard_scroll"
         android:layout_width="match_parent"

@@ -11,48 +11,43 @@ import com.example.spaceship_merge.MainActivity.Companion.PREFS_NAME
 import kotlin.collections.mutableListOf
 import kotlin.collections.remove
 
-//Lose condition idea: if you launch a ship that hits another ship before full entering anti-gravity zone, you lose
-
-//Handles the logic of the Spaceship Merge Game
+// The game logic that manages the behaviors, scoring, and rules
 class SpaceshipMerge {
 
     private val width : Int
     private val height : Int
-
+    //Speed the ship moves
     private val shipSpeed = 50f
-
+    // List of the ships in game
     private val spaceships = mutableListOf<Spaceship>()
-
+    // Refers to the ship which is good to launch
     private var shipToLaunch : Spaceship? = null
+    // Sees if ship is good to go
     private var launchReady = false
+    // Starting position for new ships
     private val launchPosition : Pair<Float, Float>
 
     private var currentScore : Int = 0
 
-    ///private val gridCellSize = 300f
-
     private var gameOver = false
-
-//    private val numGridCols : Int
-//    private val numGridRows : Int
 
     private val shipScale = 1.25
 
     val shipBaseSize : Float
 
-    //If stickyMode is true, ships stick to the boundaries of the screen
+    //If stickyMode is true the ships stick to the boundaries
     private var stickyMode : Boolean = false
-
+    // Tracks highest tier ship which apeared
     private var currentMaxTier = 0
-
+    // Grid to put into cells
     private var grid : Array<Array<GridCell>>
-
+    // assigns id to each ship
     private var nextShipId : Int = 0
-
+    // Acessing the shared preferences
     private var context : Context
-
+    // the hieght of the top score bar
     private val topBarHeight : Int
-
+    // Initialises the game with dimensions and makes the grid
     constructor(width : Int, height : Int, topBarHeight: Int, context : Context){
         this.width = width
         this.height = height
@@ -62,36 +57,16 @@ class SpaceshipMerge {
 
         shipBaseSize = width * .1f
 
-        //Build the grid with dynamic cell sizes depending on the largest ship size displayed
+        // Build the grid based on the largest ship size possible
         grid = buildGrid(calculateGridCellSize())
-
-//        //Define grid squares that fill the anti-gravity zone
-//        numGridCols = (width/gridCellSize).toInt() + 1
-//        numGridRows = ((height/2)/gridCellSize).toInt() + 1
-//
-//        val cellWidth = width/numGridCols.toFloat()
-//        val cellHeight = height/numGridRows.toFloat()
-//
-//        //2D array of grid cells that fill the anti-gravity zone for collision detection
-//        grid = Array(numGridRows){ row ->
-//            Array(numGridCols){ col ->
-//                val left = col * cellWidth
-//                val top = row * cellHeight
-//                val right = left + cellWidth
-//                val bottom = top + cellHeight
-//                GridCell(row, col, RectF(left, top, right, bottom))
-//            }
-//        }
-//
-//        setUpCellAdjacencies()
-
+        // loads the first ship
         loadSpaceship((0..2).random())
     }
-
+    // Returns the current score
     fun getScore() : Int{
         return currentScore
     }
-
+    // Resets the game to start new game
     fun reset(){
         spaceships.clear()
         currentMaxTier = 0
@@ -103,152 +78,90 @@ class SpaceshipMerge {
         loadSpaceship((0..2).random())
     }
 
-    //Turn on and of sticky mode
+    // Turns on and of sticky mode
     fun useStickyMode(stickyMode : Boolean) {
         this.stickyMode = stickyMode
     }
-
+    // returns when sticky is enabled!
     fun isStickyMode() : Boolean{
         return stickyMode
     }
-
-//    //Add references to all adjacent cells of every grid cell
-//    private fun setUpCellAdjacencies(){
-//        for(row in grid.indices){
-//            for(col in grid[row].indices){
-//                //Add upper adjacent cell
-//                if(row != 0){
-//                    grid[row][col].adjacentCells.add(grid[row - 1][col])
-//
-//                    //Add upper left adjacent cell
-//                    if(col != 0){
-//                        grid[row][col].adjacentCells.add(grid[row - 1][col - 1])
-//                    }
-//
-//                    //Add upper right adjacent cell
-//                    if(col != grid[row].size - 1){
-//                        grid[row][col].adjacentCells.add(grid[row - 1][col + 1])
-//                    }
-//                }
-//
-//
-//
-//                //Add lower adjacent cell
-//                if(row != grid.size - 1){
-//                    grid[row][col].adjacentCells.add(grid[row + 1][col])
-//
-//                    //Add lower left adjacent cell
-//                    if(col != 0){
-//                        grid[row][col].adjacentCells.add(grid[row + 1][col - 1])
-//                    }
-//
-//                    //Add lower right adjacent cell
-//                    if(col != grid[row].size - 1){
-//                        grid[row][col].adjacentCells.add(grid[row + 1][col + 1])
-//                    }
-//                }
-//
-//                //Add left adjacent cell
-//                if(col != 0){
-//                    grid[row][col].adjacentCells.add(grid[row][col - 1])
-//                }
-//
-//                //Add right adjacent cell
-//                if(col != grid[row].size - 1){
-//                    grid[row][col].adjacentCells.add(grid[row][col + 1])
-//                }
-//            }
-//        }
-//    }
-
+    //
     fun loadSpaceship(tier : Int){
-        //If there is already a ship ready to launch, don't load a new ship
+        // If there is already a ship ready to launch do not load new ship
         if(launchReady) return
-
+        // Calculates the size on tier
         val scale = Math.pow(shipScale, (tier - 1.0)).toFloat()
-
         val shipWidth = (shipBaseSize * scale)
         val shipHeight = (shipBaseSize * scale)
-
+        // If largest ship, rebuilds the grid!
         if(tier > currentMaxTier){
             currentMaxTier = tier
             grid = buildGrid(calculateGridCellSize())
         }
-
-
+        // Creates the new ship upwards
         val ship = Spaceship(nextShipId, launchPosition.first, y = launchPosition.second, (shipSpeed * Math.cos(Math.toRadians(-90.0))).toFloat(),(shipSpeed * Math.sin(Math.toRadians(-90.0))).toFloat(),shipWidth, shipHeight, tier, 0f, true, false, false)
 
         nextShipId += 1
 
         spaceships.add(ship)
 
-        //Set as the ship to launch
+        // Sets ship good to take off :))
         shipToLaunch = ship
 
-        //Spaceship is now ready to launch
+        // Ready for takeoff!
         launchReady = true
     }
 
-    //Defines a loss
+    // Defines a loss
     fun checkLoseCondition(){
 
     }
-
+    //Determines which grid cells a ship based off the rectangle around the ship!
     private fun getCellsForShip(ship : Spaceship) : MutableSet<GridCell>{
         var cells = mutableSetOf<GridCell>()
 
         val cellWidth = grid[0][0].rect.width()
         val cellHeight = grid[0][0].rect.height()
 
-        //Compute the minimum and maximum cols/rows the ship can be in and make sure it isn't out of bounds
+        // Sees what rows and columns the spaceship spans
         val minCol = (ship.rect.left / cellWidth).toInt().coerceIn(0, grid[0].size - 1)
         val maxCol = (ship.rect.right / cellWidth).toInt().coerceIn(0, grid[0].size - 1)
         val minRow = (ship.rect.top / cellHeight).toInt().coerceIn(0, grid[0].size - 1)
         val maxRow = (ship.rect.bottom / cellHeight).toInt().coerceIn(0, grid[0].size - 1)
-
+        //adds the cells in this range!
         for(row in minRow..maxRow){
             for(col in minCol..maxCol){
                 cells.add(grid[row][col])
             }
         }
-
         return cells
     }
-
     fun canFitIntoAntiGravity(ship: Spaceship): Boolean {
         //Determine which cells the ship could be blocked by another ship in
         val blockingCells = getCellsForShip(ship)
 
-//        for (row in grid){
-//            for (cell in row){
-//                if (RectF.intersects(cell.rect, ship.rect)) {
-//                    blockingCells.add(cell)
-//                }
-//            }
-//        }
-
-        //If any of the blocking cells has a visible ship, check if that ship blocks the incoming ship
+        //If any of the blocking cells has visible ship, check if that ship blocks incoming ship
         for (cell in blockingCells) {
             for(blockingShip in cell.ships.filter{it.visible}){
                 if (RectF.intersects(blockingShip.rect, ship.rect) && blockingShip.tier != ship.tier) {
                     if(ship.rect.bottom > height/2f){
-                        //Return false if the launched ship is sticking out of the anti gravity zone
+                        //Return false if ship is sticking out of antigravity zone
                         return false
                     }
                 }
             }
         }
-
         return true
     }
 
-
+    //Returns whether game eneded
     fun isGameOver() : Boolean{
         return gameOver
     }
-
+    // Updates high schore in shared preferences if current score is higher
     fun updateHighScore(): Int {
-        if (!gameOver) return 0   // or return currentScore if you prefer
+        if (!gameOver) return 0
 
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val oldHigh = prefs.getInt(HIGH_SCORE_KEY, 0)
@@ -259,54 +172,53 @@ class SpaceshipMerge {
         } else {
             oldHigh
         }
-
         return newHigh
     }
-
+    // Calculates the optimal size based on largest ship
     private fun calculateGridCellSize() : Float {
-        //Cell size should be able to fit the largest ship size
+        // finds calculation of biggest ship
         val baseCellSize = shipBaseSize
         val scale = Math.pow(shipScale, (currentMaxTier - 1.0)).toFloat()
         val largestShipSize = shipBaseSize * scale
 
-        //Return cell size that fits the largest ship
+        // Return cell size that fits biggest ship
         return 100f + largestShipSize
     }
-
+    // Builds the grid of cells which covers antigravity zone
     private fun buildGrid(cellSize : Float) : Array<Array<GridCell>>{
-        //Define grid squares that fill the anti-gravity zone
+        // Calculates number of colums and rows fit in antigravity zone
         val numGridCols = (width/cellSize).toInt() + 1
         val numGridRows = ((height/2)/cellSize).toInt() + 1
-
+        // calcualtes actuall cell dimensions to fill space
         val cellWidth = width/numGridCols.toFloat()
         val cellHeight = height/numGridRows.toFloat()
 
-        //2D array of grid cells that fill the anti-gravity zone for collision detection
+        // creates the 2d array of cells
         val generatedGrid = Array(numGridRows){ row ->
             Array(numGridCols){ col ->
                 val left = col * cellWidth
                 val top = row * cellHeight
                 val right = left + cellWidth
                 val bottom = top + cellHeight
+                // makes grid cell with the position above!
                 GridCell(row, col, RectF(left, top, right, bottom))
             }
         }
-
-        //setUpCellAdjacencies()
-
         return generatedGrid
     }
-
+    // Merges two ships of same tier into the next tier
     private fun mergeShips(ship1 : Spaceship, ship2 : Spaceship, shipsToRemove : MutableList<Spaceship>, shipsToAdd : MutableList<Spaceship>){
+        // Only merging if same
         if(ship1.tier != ship2.tier) return
-
+        //creates one higher
         val tier = ship1.tier + 1
+        // rebuild if this is largest ship
         if(tier > currentMaxTier){
             currentMaxTier = tier
             grid = buildGrid(calculateGridCellSize())
         }
 
-        //score 500 points for a merge and 100*tier points for a new ship in the anti-gravity zone
+        //score 500 points for a merge plus 100 times tier points for new ship
         currentScore += 500 + (100 * (tier + 1))
 
         val mergedX = (ship1.x + ship2.x)/2f
@@ -321,14 +233,14 @@ class SpaceshipMerge {
 
         val mergedShip = Spaceship(nextShipId, mergedX, y = mergedY, mergedVelocityX, mergedVelocityY,shipWidth, shipHeight, tier, 0f, true, true, true)
         nextShipId += 1
-
+        // Updates the rectanle of the ship
         mergedShip.rect.set(
             mergedShip.x - mergedShip.width/2f,
             mergedShip.y - mergedShip.height/2f,
             mergedShip.x + mergedShip.width/2f,
             mergedShip.y + mergedShip.height/2f
         )
-
+        // will make ship invisible!
         ship1.visible = false
         ship2.visible = false
 
@@ -338,55 +250,52 @@ class SpaceshipMerge {
         shipsToAdd.add(mergedShip)
     }
 
-    //Using researched physics formulas for reflecting a velocity vector across a collision normal,
-    //implements bounce mechanics for the two colliding ships
+    // Using researched physics formulas when two ships of different tiers hit each other
+    // Was actually fun researching on this topic :) Hope these notes are interesting
     private fun bounceShips(ship1 : Spaceship, ship2 : Spaceship){
         if(ship1.tier == ship2.tier) return
 
-        //Using the vector reflection formula R = V - 2 * (V • N) * N, we find the reflected velocities
+        // Uses the vector reflection formula R = V - 2 * (V • N) * N
 
-        //First, calculate the unit normal vectors using the formula N = VectorAB/|VectorAB|,
-        //Where VectorAB is the vector from ship1 to ship2 (difference) and |VectorAB| is the length of VectorAB
+        // First, calculate the unit normal vectors using formula N = VectorAB/|VectorAB|,
+        // where VectorAB is the vector from ship1 to ship2 and |VectorAB| is the length of VectorAB
         val diffX = ship1.x - ship2.x
         val diffY = ship1.y - ship2.y
         val length = Math.max(Math.sqrt((diffX * diffX + diffY * diffY).toDouble()), .01) //protect against division by zero
         val unitNormalX = (diffX / length).toFloat()
         val unitNormalY = (diffY / length).toFloat()
-
+        // obtains the velocities
         var velX1 = ship1.velocityX
         var velY1 = ship1.velocityY
         var velX2 = ship2.velocityX
         var velY2 = ship2.velocityY
-
+        // if ship1 is stationary, gets opposite velocity of ship2!
         if(ship1.velocityX == 0f && ship1.velocityY == 0f){
             velX1 = -ship2.velocityX * (0.80f)
             velY1 = -ship2.velocityY * (0.80f)
         }
+        // vise versa!
         if(ship2.velocityX == 0f && ship2.velocityY == 0f){
             velX2 = -ship1.velocityX * (0.80f)
             velY2 = -ship1.velocityY * (0.80f)
         }
 
-
-        //Next, calculate the dot products of each ship's velocity vectors with the unit normal vectors: (V • N)
+        // Calculate the dot products of each ship's velocity vectors with (V • N)
         var dotProduct1 = velX1 * unitNormalX + velY1 * unitNormalY
         var dotProduct2 = velX2 * unitNormalX + velY2 * unitNormalY
 
-        //Finally, reflect each velocity using the vector reflection formula: R = V - 2 * (V • N) * N
+        // Reflect each velocity using the vector reflection formula: R = V - 2 * (V • N) * N
         ship1.velocityX = (velX1 - 2 * dotProduct1 * unitNormalX)
         ship1.velocityY = (velY1 - 2 * dotProduct1 * unitNormalY)
         ship2.velocityX = (velX2 - 2 * dotProduct2 * unitNormalX)
         ship2.velocityY = (velY2 - 2 * dotProduct2 * unitNormalY)
 
-
-        //Offset the rockets so they are no longer overlapping
+        // Offset the rockets so they are no longer overlapping
         val offset = 5f
         ship1.x += (unitNormalX * offset)
         ship1.y += (unitNormalY * offset)
         ship2.x -= (unitNormalX * offset)
         ship2.y -= (unitNormalY * offset)
-
-
 
         // Update rectangles
         val ship1Left = ship1.x - ship1.width/2
@@ -403,32 +312,30 @@ class SpaceshipMerge {
         ship2.rect.set(ship2Left, ship2Top, ship2Right, ship2Bottom)
 
     }
-
-
-
+    // returns list of all ships in game
     fun getShips() : List<Spaceship>{
         return spaceships
     }
-
+    // returns if ship is good to launch
     fun readyToLaunch() : Boolean{
         return launchReady
     }
 
-    //Moves the ship to launch left or right when dragged
+    // Moves the ship to launch left or right when dragged
     fun dragShip(distanceX : Float){
 
         val ship = shipToLaunch ?: return
-
+        // horizontal
         ship.x += distanceX
-
+        // left boundary!
         if(ship.x - ship.width/2f < 0f){
             ship.x = ship.width/2f
         }
-
+        // right boundary!
         if(ship.x + ship.width/2f > width){
             ship.x = width - ship.width/2f
         }
-
+        // updating the bounding rectangle
         ship.rect.set(
             ship.x - ship.width / 2f,
             ship.y - ship.height / 2f,
@@ -437,7 +344,7 @@ class SpaceshipMerge {
         )
     }
 
-    //Initiate a spaceship launch
+    // Launches the current spaceship
     fun launch(){
         val ship = shipToLaunch ?: return
 
@@ -445,42 +352,40 @@ class SpaceshipMerge {
         shipToLaunch = null
         launchReady = false
 
-        //Load next spaceship to launch
+        // Load next spaceship to launch
         loadSpaceship((0..2).random())
     }
 
-    //Handle movement of any spaceship, every frame
+    // Updates the position of all the moving ships
     fun moveShips(){
         for (ship in spaceships.toList()) {
 
-            //Move ship if it hasn't slowed enough yet
+            // Moves the ship launched and has velocity
             if(ship.launched && (Math.abs(ship.velocityX) > 0.1f || Math.abs(ship.velocityY) > 0.1f)) {
 
-//                //Ship enters anti-gravity zone in upper half of screen
 //                if(!ship.antiGravity && ship.y < height/2f){
 //                    ship.antiGravity = true
 //                }
 
-                //Handles anti-gravity ship entry, detects if it doesn't fit (lose condition)
+                // Checks if ship in antigravity area
                 if (!ship.antiGravity && ship.rect.top < height/2f){
                     if (!canFitIntoAntiGravity(ship)){
                         gameOver = true
                         return
                     }
 
-                    //If ship is fully inside anti-gravity zone, mark it as true
+                    //If ship is fully inside antigravity zone makr true
                     if(ship.rect.bottom <= height/2f){
                         ship.antiGravity = true
 
-                        //score points everytime a ship makes it into the anti-gravity zone
+                        // award points for good entry
                         currentScore += 100 * (ship.tier + 1)
                     }
-
                 }
-
+                // Applies velocity to position
                 ship.x += ship.velocityX
                 ship.y += ship.velocityY
-
+                // updates the rectangle
                 ship.rect.set(
                     ship.x - ship.width/2f,
                     ship.y - ship.height/2f,
@@ -488,31 +393,24 @@ class SpaceshipMerge {
                     ship.y + ship.height/2f
                 )
 
-                //If ship hits left or right boundary, reverse direction
+                // handles collision with left and right boundaries
                 if(ship.x - ship.width/2f < 0f || ship.x + ship.width/2f > width) {
                     ship.velocityX *= -1
-
-//                    val newShipAngle = Math.toDegrees(Math.atan2(ship.velocityY.toDouble(), ship.velocityX.toDouble())).toFloat()
-//                    ship.shipAngle = newShipAngle
-
                 }
 
-                //If ship hits top or bottom boundary of anti-gravity zone, reverse direction
+                // handles colision with top bottom boundaries
                 if(ship.antiGravity && (ship.y - ship.height/2f < topBarHeight || ship.y + ship.height/2f > height/2f )) {
                     ship.velocityY *= -1
-
-//                    val newShipAngle = Math.toDegrees(Math.atan2(ship.velocityY.toDouble(), ship.velocityX.toDouble())).toFloat()
-//                    ship.shipAngle = newShipAngle
                 }
             }else if(ship.launched){
-                //Stop the movement of ships if under .1 velocity
+                // Stop the movement of ships if under .1
                 if(Math.abs(ship.velocityX) > 0f) ship.velocityX = 0f
                 if(Math.abs(ship.velocityY) > 0f) ship.velocityY = 0f
             }
 
             if(ship.antiGravity) {
 
-                //Slowly decrease the ships velocity until it comes to a stop (anti-gravity with friction)
+                // Decrease the ships velocity until it stops
                 ship.velocityX *= 0.97f
                 ship.velocityY *= 0.97f
 
@@ -520,23 +418,13 @@ class SpaceshipMerge {
 
                 val newCells = getCellsForShip(ship)
 
-
-//                //Update the grids the current ship belongs to
-//                for (row in grid) {
-//                    for (cell in row) {
-//                        if (RectF.intersects(cell.rect, ship.rect)) {
-//                            newCells.add(cell)
-//                        }
-//                    }
-//                }
-
                 // Remove ship from previous cells
                 for(cell in ship.currentCells){
                     if(!newCells.contains(cell)) {
                         cell.ships.remove(ship)
                     }
                 }
-
+                // adds the ship to the new cell
                 for(cell in newCells) {
                     cell.ships.add(ship)
                 }
@@ -544,12 +432,12 @@ class SpaceshipMerge {
                 ship.currentCells = newCells
 
 
-                //After every move, check to make sure ships remain in bounds. If not, force them to
+                // Keep the ships within the bounds
                 val minY = ship.height/2f + topBarHeight
                 val maxY = height/2f - ship.height/2f
                 val minX = ship.width/2f
                 val maxX = width - ship.width/2f
-
+                // this stops y position and velocity for stickyy
                 if(ship.y < minY){
                     ship.y = minY
                     if(stickyMode) ship.velocityY = 0f
@@ -566,7 +454,7 @@ class SpaceshipMerge {
                     ship.x = maxX
                     if(stickyMode) ship.velocityX = 0f
                 }
-
+                // updates rectangle after the clamp
                 ship.rect.set(
                     ship.x - ship.width/2f,
                     ship.y - ship.height/2f,
@@ -577,18 +465,17 @@ class SpaceshipMerge {
         }
     }
 
-    //Checks for any ship collisions
+    // Checks for any ship collisions
     fun checkCollisions(){
 
-        //Stores two pairs of ship ids to mark two ships as already compared and avoid duplicate comparisons
+        // tracks the pairs of ships already compared
         val comparedShips = mutableSetOf<Pair<Int, Int>>()
-
         val shipsToRemove = mutableListOf<Spaceship>()
         val shipsToAdd = mutableListOf<Spaceship>()
-
+        // checks each ship for any collision
         for(ship in spaceships.toList()) {
             val cells = getCellsForShip(ship)
-
+            // Collect all other visbile ships in those cells
             val visibleShipsInCells = mutableSetOf<Spaceship>()
 
             for (cell in cells) {
@@ -596,31 +483,29 @@ class SpaceshipMerge {
                     visibleShipsInCells.add(otherShip)
                 }
             }
-
+            // Checks with each nearby ship
             for (otherShip in visibleShipsInCells) {
-
+                // skips if we already did this one
                 if(comparedShips.contains(Pair(ship.id, otherShip.id))) continue
 
                 comparedShips.add(Pair(ship.id, otherShip.id))
                 comparedShips.add(Pair(otherShip.id, ship.id))
-
+                // checks if the rectangles intersect
                 if (ship != otherShip && RectF.intersects(ship.rect, otherShip.rect)) {
                     Log.w("MainActivity", "Collision detected")
+                    // if same tier we merge
                     if (ship.tier == otherShip.tier) {
                         mergeShips(ship, otherShip, shipsToRemove, shipsToAdd)
                     } else {
+                        // we bounce around!!
                         if(ship.rect.bottom <= height/2f){
                             bounceShips(ship, otherShip)
                         }
-
                     }
                 }
-
             }
         }
-
-
-        //Remove old ships and update cells
+        // removes the merge ships and update cells
         for(ship in shipsToRemove){
             spaceships.remove(ship)
             for(cell in ship.currentCells) {
@@ -628,108 +513,22 @@ class SpaceshipMerge {
             }
         }
 
-        //Add merged ships and update cells
+        // adds new merged ships and add to grid cell
         for(ship in shipsToAdd){
             spaceships.add(ship)
 
             //val shipRect = ship.getRect()
-
+            // finds which cell the new ship has
             val newCells = getCellsForShip(ship)
-
-
+            // adds ship to these cells
             for(cell in newCells){
                 cell.ships.add(ship)
             }
-
             ship.currentCells = newCells
-
         }
-
-
-
-//        for(row in grid){
-//            for(cell in row){
-//
-//                //Only check visible and moving ships
-//                val visibleShipsInCell = cell.ships.filter{it.visible}
-//
-//                if(visibleShipsInCell.size < 2) continue
-//
-//                for(i in visibleShipsInCell.indices){
-//                    val ship1 = visibleShipsInCell[i]
-//                    for(j in i+1 until visibleShipsInCell.size){
-//                        val ship2 = visibleShipsInCell[j]
-//
-//                        if(ship1.visible && ship2.visible && ship1 != ship2 && RectF.intersects(ship1.rect, ship2.rect)){
-//                            Log.w("MainActivity", "Collision detected")
-//                            if(ship1.tier == ship2.tier){
-//                                mergeShips(ship1, ship2, shipsToRemove, shipsToAdd)
-//                            }else{
-//                                bounceShips(ship1, ship2)
-//                            }
-//
-//                        }
-//                    }
-//                }
-
-//                for(adjacentCell in cell.adjacentCells){
-//
-//                    //If two cells have already been compared, skip duplicate comparison
-//                    if(comparedCells.contains(Pair(Pair(cell.row, cell.col), Pair(adjacentCell.row, adjacentCell.col)))) continue
-//
-//                    val visibleShipsInAdjacentCell = adjacentCell.ships.filter{it.visible}
-//
-//                    for(ship1 in visibleShipsInCell){
-//                        for(ship2 in visibleShipsInAdjacentCell){
-//                            if(ship1.visible && ship2.visible && ship1 != ship2 && RectF.intersects(ship1.getRect(), ship2.getRect())){
-//                                Log.w("MainActivity", "Collision detected")
-//                                if(ship1.tier == ship2.tier){
-//                                    mergeShips(ship1, ship2, shipsToRemove, shipsToAdd)
-//                                }else{
-//                                    bounceShips(ship1, ship2)
-//                                }
-//                            }
-//                        }
-//                    }
-//
-//                    //Add both orderings of the two cells to the comparedCells set
-//                    comparedCells.add(Pair(Pair(cell.row, cell.col), Pair(adjacentCell.row, adjacentCell.col)))
-//                    comparedCells.add(Pair(Pair(adjacentCell.row, adjacentCell.col), Pair(cell.row, cell.col)))
-//                }
-//            }
-//        }
-
-//        //Remove old ships and update cells
-//        for(ship in shipsToRemove){
-//            spaceships.remove(ship)
-//            for(cell in ship.currentCells) {
-//                cell.ships.remove(ship)
-//            }
-//        }
-//
-//        //Add merged ships and update cells
-//        for(ship in shipsToAdd){
-//            spaceships.add(ship)
-//
-//            //val shipRect = ship.getRect()
-//
-//            val newCells = mutableSetOf<GridCell>()
-//
-//            for(row in grid){
-//                for(cell in row){
-//                    if(RectF.intersects(cell.rect, ship.rect)){
-//                        newCells.add(cell)
-//                        cell.ships.add(ship)
-//                    }
-//                }
-//            }
-//            ship.currentCells = newCells
-
     }
 
-
-
-    // Defines a spaceship
+    // This class represents a spaceship!!
     data class Spaceship(
         val id : Int,
         var x : Float,
@@ -751,28 +550,20 @@ class SpaceshipMerge {
             y + height / 2f
         )
     ){
-//        fun getRect() : RectF{
-//            return RectF(
-//                x - width / 2f,
-//                y - height / 2f,
-//                x + width / 2f,
-//                y + height / 2f
-//            )
-//        }
     }
 
-    //Defines a grid cell, which is one portion of the anti-gravity zone where ships will exist
+    // Defines one cell in collision.
     class GridCell(
         val row: Int,
         val col: Int,
 
-        //Stores the grid cell's position in the gameView
+        // Stores the grid cell position
         val rect: RectF,
 
-        //Stores references to all ships in the current grid cell
+        //Stores references to all ships in current cell
         val ships: MutableSet<Spaceship> = mutableSetOf(),
 
-        //Stores all adjacent cells
+        //Stores adjacent cells
         val adjacentCells: MutableSet<GridCell> = mutableSetOf()
     )
 }

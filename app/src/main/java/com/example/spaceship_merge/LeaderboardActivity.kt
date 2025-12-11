@@ -14,22 +14,24 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-
+// The activity which displays the top ten highest scores using firebase!
 class LeaderboardActivity : AppCompatActivity() {
 
     companion object {
+        // the number of leaderboard positions
         private const val NUM_SLOTS = 10
         private const val TAG = "LeaderboardActivity"
     }
-
+    // holds all the leadarboard rows
     private lateinit var leaderboardContainer: LinearLayout
+    // Lists the TextViews for each leaderboard position
     private val rowViews = mutableListOf<TextView>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_leaderboard)
 
-        // Back button logic
+        // The back button logic
         val backButton =
             findViewById<com.google.android.material.button.MaterialButton>(R.id.back_button)
         backButton.setOnClickListener {
@@ -38,33 +40,35 @@ class LeaderboardActivity : AppCompatActivity() {
 
         leaderboardContainer = findViewById(R.id.leaderboard_container)
 
-        // Create 10 boxes (turquoise background, white text, optional red border)
+        // Creates the ten boxes
         createRows()
 
-        // Firebase: /leaderboard/username1, score1, ..., username10, score10
+        // Learned in class, how to use the firebase!
         val db = FirebaseDatabase.getInstance()
         val leaderboardRef = db.getReference("leaderboard")
-
+        // Adds the listner which updates the UI whenever data changes
         leaderboardRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                // For each position 1..10, get usernameX + scoreX
+                // Updates the leaderboard position
                 for (i in 1..NUM_SLOTS) {
+                    // Reads the username and score
                     val username = snapshot.child("username$i")
-                        .getValue(String::class.java) ?: "---"
+                        .getValue(String::class.java) ?: "***"
                     val score = snapshot.child("score$i")
                         .getValue(Int::class.java) ?: 0
-
+                    // This updates the TextView with the formatted text!
                     rowViews[i - 1].text = formatRow(i, username, score)
                 }
             }
-
+            // Used to help debug:)
             override fun onCancelled(error: DatabaseError) {
-                Log.e(TAG, "Failed to read leaderboard: ${error.message}")
+                Log.w(TAG, "Failed to read leaderboard: ${error.message}")
             }
         })
     }
-
+    // Creates the ten textviews to display leaderboard entries!
     private fun createRows() {
+        // Sets the layour parameters
         val layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
@@ -73,29 +77,26 @@ class LeaderboardActivity : AppCompatActivity() {
             leftMargin = dpToPx(24)
             rightMargin = dpToPx(24)
         }
-
+        // Creates the ten rows
         for (i in 1..NUM_SLOTS) {
             val rowTextView = TextView(this).apply {
-                text = formatRow(i, "---", 0)
+                // This initializes the placeholder
+                text = formatRow(i, "***", 0)
                 textSize = 16f
                 setPadding(dpToPx(16), dpToPx(12), dpToPx(16), dpToPx(12))
                 gravity = Gravity.CENTER_VERTICAL
-
-                // white text
                 setTextColor(
                     ContextCompat.getColor(
                         this@LeaderboardActivity,
                         R.color.white
                     )
                 )
-
-                // Use your font if you want (you already use this on home)
+                // Uses earlier font
                 typeface = ResourcesCompat.getFont(
                     this@LeaderboardActivity,
                     R.font.space_grotesk_medium
                 )
-
-                // Turquoise background, red border
+                // Creates the rectangle background
                 background = GradientDrawable().apply {
                     setColor(
                         ContextCompat.getColor(
@@ -103,8 +104,9 @@ class LeaderboardActivity : AppCompatActivity() {
                             R.color.turquoise
                         )
                     )
+                    // Makes the corners rounded
                     cornerRadius = dpToPx(16).toFloat()
-                    // Optional red border
+                    // Makes red border to look nice!!
                     setStroke(
                         dpToPx(2),
                         ContextCompat.getColor(
@@ -114,17 +116,16 @@ class LeaderboardActivity : AppCompatActivity() {
                     )
                 }
             }
-
+            // Adds row to container
             leaderboardContainer.addView(rowTextView, layoutParams)
             rowViews.add(rowTextView)
         }
     }
-
+    // Formats the leaderboard entry
     private fun formatRow(rank: Int, username: String, score: Int): String {
-        // Example: "1. Shreyas - 12345"
         return "$rank. $username - $score"
     }
-
+    // Converts the dp to pixels
     private fun dpToPx(dp: Int): Int {
         return (dp * resources.displayMetrics.density).toInt()
     }
