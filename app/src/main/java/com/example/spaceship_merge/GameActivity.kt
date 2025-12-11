@@ -14,6 +14,10 @@ import androidx.core.view.WindowInsetsControllerCompat
 import java.util.Timer
 import android.net.Uri
 import android.util.Log
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.example.spaceship_merge.MainActivity.Companion.PREFS_NAME
 import com.example.spaceship_merge.MainActivity.Companion.USERNAME_KEY
 import com.example.spaceship_merge.MainActivity.Companion.HIGH_SCORE_KEY
@@ -29,6 +33,12 @@ class GameActivity : AppCompatActivity() {
 
     private var gameInProgress : Boolean = true
 
+    private val shareScoreLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+    ) {
+        // This code runs AFTER the email/share window closes
+        returnHome()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -105,6 +115,12 @@ class GameActivity : AppCompatActivity() {
 
         spaceshipMerge.updateHighScore()
 
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val score = prefs.getInt(HIGH_SCORE_KEY, 0)
+        Log.d("GameActivity", "endGame: high score from prefs = $score")
+        updateLeaderboardIfTop10(score)
+
+
         runOnUiThread{showGameOverDialog()}
     }
 
@@ -165,7 +181,7 @@ class GameActivity : AppCompatActivity() {
             putExtra(Intent.EXTRA_TEXT, body)
         }
 
-        startActivity(Intent.createChooser(intent, "Share your score"))
+        shareScoreLauncher.launch(Intent.createChooser(intent, "Share your score"))
     }
 
     private fun returnHome(){
@@ -184,5 +200,83 @@ class GameActivity : AppCompatActivity() {
 
         gameView.postInvalidate()
     }
+
+    private fun updateLeaderboardIfTop10(score: Int) {
+        Log.d("GameActivity", "In the leaderboard update fn, score = $score")
+
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val username = prefs.getString(USERNAME_KEY, "Player") ?: "Player"
+
+        if (username.isBlank()) {
+            Log.d("GameActivity", "Username blank, skipping leaderboard")
+            return
+        }
+
+        val db = FirebaseDatabase.getInstance()
+        val leaderboardRef = db.getReference("leaderboard")
+
+        leaderboardRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+
+                // Read username1..username10 and score1..score10
+                val usernames = MutableList(10) { i ->
+                    snapshot.child("username${i + 1}")
+                        .getValue(String::class.java) ?: "---"
+                }
+
+                val scores = MutableList(10) { i ->
+                    snapshot.child("score${i + 1}")
+                        .getValue(Int::class.java) ?: 0
+                }
+
+                Log.d("GameActivity", "Current leaderboard usernames=$usernames scores=$scores")
+
+                // Find insert position (higher scores are better)
+                var insertPos = -1
+                for (i in 0 until 10) {
+                    if (score > scores[i]) {
+                        insertPos = i
+                        break
+                    }
+                }
+
+                if (insertPos == -1) {
+                    Log.d("GameActivity", "Score not in top 10, not updating")
+                    return
+                }
+
+                // Shift down entries to make room for new entry
+                for (i in 9 downTo insertPos + 1) {
+                    usernames[i] = usernames[i - 1]
+                    scores[i] = scores[i - 1]
+                }
+
+                usernames[insertPos] = username
+                scores[insertPos] = score
+
+                Log.d("GameActivity", "New leaderboard usernames=$usernames scores=$scores")
+
+                val updates = HashMap<String, Any>()
+                for (i in 0 until 10) {
+                    val idx = i + 1
+                    updates["username$idx"] = usernames[i]
+                    updates["score$idx"] = scores[i]
+                }
+
+                leaderboardRef.updateChildren(updates)
+                    .addOnSuccessListener {
+                        Log.d("GameActivity", "Leaderboard update success")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("GameActivity", "Leaderboard update FAILED", e)
+                    }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("GameActivity", "Leaderboard read cancelled: ${error.message}")
+            }
+        })
+    }
+
 
 }

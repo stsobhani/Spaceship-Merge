@@ -30,7 +30,8 @@ class LeaderboardActivity : AppCompatActivity() {
         setContentView(R.layout.activity_leaderboard)
 
         // Back button logic
-        val backButton = findViewById<com.google.android.material.button.MaterialButton>(R.id.back_button)
+        val backButton =
+            findViewById<com.google.android.material.button.MaterialButton>(R.id.back_button)
         backButton.setOnClickListener {
             finish()
         }
@@ -40,18 +41,17 @@ class LeaderboardActivity : AppCompatActivity() {
         // Create 10 boxes (turquoise background, white text, optional red border)
         createRows()
 
-        // Firebase: /leaderboard/rank1, ..., /leaderboard/rank10
+        // Firebase: /leaderboard/username1, score1, ..., username10, score10
         val db = FirebaseDatabase.getInstance()
         val leaderboardRef = db.getReference("leaderboard")
 
         leaderboardRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                // For each rank1..rank10, get username + score
+                // For each position 1..10, get usernameX + scoreX
                 for (i in 1..NUM_SLOTS) {
-                    val slotSnap = snapshot.child("rank$i")
-                    val username = slotSnap.child("username")
+                    val username = snapshot.child("username$i")
                         .getValue(String::class.java) ?: "---"
-                    val score = slotSnap.child("score")
+                    val score = snapshot.child("score$i")
                         .getValue(Int::class.java) ?: 0
 
                     rowViews[i - 1].text = formatRow(i, username, score)
