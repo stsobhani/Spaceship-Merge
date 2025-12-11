@@ -165,7 +165,7 @@ class GameActivity : AppCompatActivity() {
     }
     // Opens the dialog to let user share score
     private fun sendScoreByEmail() {
-        Log.d("Email", "In the email function")
+        Log.w("Email", "In the email function")
         // gets username and score
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
         val username = prefs.getString(USERNAME_KEY, "")
@@ -246,7 +246,7 @@ class GameActivity : AppCompatActivity() {
                 }
                 // The score did not make the top 10
                 if (insertPos == -1) {
-                    Log.d("GameActivity", "Score not in top 10 so no update")
+                    Log.w("GameActivity", "Score not in top 10 so no update")
                     return
                 }
                 // Shift down scores to make room

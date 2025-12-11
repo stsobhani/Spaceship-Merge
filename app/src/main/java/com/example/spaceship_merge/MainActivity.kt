@@ -156,11 +156,11 @@ class MainActivity : AppCompatActivity() {
             // The tutorial text
             val tutorialTextView = TextView(context).apply {
                 text = "HOW TO PLAY\n\n" +
-                        "• Tap to shoot a ship\n" +
-                        "• When two same-level ships touch, they merge\n" +
-                        "• Merging creates a higher-level ship\n" +
-                        "• Try to build the biggest ship\n" +
-                        "• Don’t let the board get too full!"
+                        "- Tap to shoot a ship\n" +
+                        "- When two same level ships touch, they merge\n" +
+                        "- Merging creates a higher level ship\n" +
+                        "- Try to build the biggest ship\n" +
+                        "- Do not let the board get too full!"
                 setTextColor(ContextCompat.getColor(context, R.color.white))
                 textSize = 14f
             }
