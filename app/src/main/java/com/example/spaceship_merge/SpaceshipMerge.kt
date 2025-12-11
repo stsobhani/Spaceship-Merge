@@ -99,6 +99,7 @@ class SpaceshipMerge {
         launchReady = false
         gameOver = false
         shipToLaunch = null
+        currentScore = 0
         loadSpaceship((0..2).random())
     }
 
