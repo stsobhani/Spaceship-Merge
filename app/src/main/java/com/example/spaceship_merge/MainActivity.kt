@@ -29,9 +29,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adView: AdView
 
     companion object {
-        private const val PREFS_NAME = "prefs"
-        private const val USERNAME_KEY = "username"
-        private const val HIGH_SCORE_KEY = "high_score"
+        const val PREFS_NAME = "prefs"
+        const val USERNAME_KEY = "username"
+        const val HIGH_SCORE_KEY = "high_score"
         private const val USERNAME_MAX_LEN = 15
     }
 

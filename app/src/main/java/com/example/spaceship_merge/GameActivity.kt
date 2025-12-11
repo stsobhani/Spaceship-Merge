@@ -1,9 +1,11 @@
 package com.example.spaceship_merge
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.GestureDetector
 import android.view.MotionEvent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -17,6 +19,10 @@ class GameActivity : AppCompatActivity() {
     private lateinit var detector : GestureDetector
 
     private lateinit var spaceshipMerge : SpaceshipMerge
+
+    private lateinit var gameTimer: Timer
+
+    private var gameInProgress : Boolean = true
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,7 +50,7 @@ class GameActivity : AppCompatActivity() {
         detector.setOnDoubleTapListener(th)
 
         var task : GameTimerTask = GameTimerTask(this)
-        var gameTimer : Timer = Timer()
+        gameTimer = Timer()
         gameTimer.schedule(task, 0L, GameView.DELTA_TIME)
     }
 
@@ -63,7 +69,7 @@ class GameActivity : AppCompatActivity() {
             if(spaceshipMerge.readyToLaunch()){
                 //Move the launch shift left and right (to aim)
                 spaceshipMerge.dragShip(-distanceX)
-                return super.onScroll(e1, e2, distanceX, distanceY)
+                return true
             }
 
             return false
@@ -72,6 +78,8 @@ class GameActivity : AppCompatActivity() {
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
+        if (!gameInProgress) return true
+
         if (event != null) {
             detector.onTouchEvent(event)
 
@@ -80,12 +88,64 @@ class GameActivity : AppCompatActivity() {
             }
 
         }
-        return super.onTouchEvent(event)
+        return true
+    }
+
+    fun endGame(){
+        gameTimer.cancel()
+        gameTimer.purge()
+        gameInProgress = false
+
+        spaceshipMerge.updateHighScore()
+
+        runOnUiThread{showGameOverDialog()}
     }
 
     fun updateGameView(){
+        if(!gameInProgress) return
+
+        if(gameView.getSpaceshipMerge().isGameOver()){
+            endGame()
+            return
+        }
+
         gameView.getSpaceshipMerge().moveShips()
         gameView.getSpaceshipMerge().checkCollisions()
+
         gameView.postInvalidate()
     }
+
+    private fun showGameOverDialog(){
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("GAME OVER")
+            .setMessage("Your ship couldn't fit into the anti-gravity zone.")
+            .setCancelable(false)
+            .setPositiveButton("Play Again"){_, _ ->
+                restartGame()
+            }
+            .setNegativeButton("Return Home"){_, _ ->
+                returnHome()
+            }
+            .create()
+
+        dialog.show()
+    }
+
+    private fun returnHome(){
+        startActivity(Intent(this, MainActivity::class.java))
+    }
+
+    private fun restartGame(){
+        gameView.getSpaceshipMerge().reset()
+        gameInProgress = true
+
+        gameTimer.cancel()
+        gameTimer.purge()
+        var task : GameTimerTask = GameTimerTask(this)
+        gameTimer = Timer()
+        gameTimer.schedule(task, 0L, GameView.DELTA_TIME)
+
+        gameView.postInvalidate()
+    }
+
 }

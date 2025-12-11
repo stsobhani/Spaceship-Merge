@@ -9,6 +9,7 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.util.Log
 import android.view.View
+import androidx.core.content.ContextCompat
 
 class GameView : View {
 
@@ -27,23 +28,34 @@ class GameView : View {
     private val background = BitmapFactory.decodeResource(resources, R.drawable.space_background)
     private val scaledBackground : Bitmap
 
+    private var screenHeight : Int = 0
+
+    private var screenWidth : Int = 0
+
+    val topBarHeight : Int = 150
+
     constructor(context : Context, width : Int, height : Int) : super(context){
-        this.width = width
-        this.height = height
+        this.screenWidth = width
+        this.screenHeight = height
+
+        this.width = this.screenWidth
+        this.height = this.screenHeight - this.topBarHeight
+
+
 
         //Scales the background image to fill the screen
-        scaledBackground = Bitmap.createScaledBitmap(background, width, height, false)
+        scaledBackground = Bitmap.createScaledBitmap(background, width, height - topBarHeight, false)
 
         paint.isAntiAlias = true
 
         loadShipImages()
 
-        spaceshipMerge = SpaceshipMerge(this.width, this.height, context)
+        spaceshipMerge = SpaceshipMerge(this.width, this.height, this.topBarHeight, context)
     }
 
     private fun loadShipImages() {
 
-        for(i in 1..numTiers) {
+        for(i in 0..numTiers) {
             val resourceId = resources.getIdentifier("ship$i", "drawable", context.packageName)
             shipBitmaps[i] = BitmapFactory.decodeResource(resources, resourceId)
         }
@@ -65,7 +77,33 @@ class GameView : View {
 //        canvas.drawBitmap(background, 0f, 0f, null)
 
 //        val scaledBackground = Bitmap.createScaledBitmap(background, canvas.width, canvas.height, true)
-        canvas.drawBitmap(scaledBackground, 0f, 0f, null)
+        canvas.drawBitmap(scaledBackground, 0f, topBarHeight.toFloat(), null)
+
+        val barPaint = Paint()
+        barPaint.color = ContextCompat.getColor(context, R.color.turquoise)
+
+        canvas.drawRect(0f, 0f, canvas.width.toFloat(), topBarHeight.toFloat(), barPaint)
+
+        barPaint.color = ContextCompat.getColor(context, R.color.red)
+        barPaint.style = Paint.Style.STROKE
+        barPaint.strokeWidth = 5f
+        canvas.drawRect(0f, 0f, canvas.width.toFloat(), topBarHeight.toFloat(), barPaint)
+
+
+        val textPaint = Paint()
+        textPaint.color = Color.WHITE
+        textPaint.textSize = 100f
+        textPaint.isAntiAlias = true
+
+        canvas.drawText("Score: ${spaceshipMerge.getScore()}", 20f, topBarHeight * .7f, textPaint)
+
+        val linePaint = Paint()
+        linePaint.color = ContextCompat.getColor(context, R.color.red)
+        linePaint.strokeWidth = 3f
+        linePaint.style = Paint.Style.STROKE
+        linePaint.isAntiAlias = true
+
+        canvas.drawLine(0f, height/2f, width.toFloat(), height/2f, linePaint)
 
         //Retrieve all ships in the current state of the game
         val ships = spaceshipMerge.getShips()
