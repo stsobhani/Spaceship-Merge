@@ -164,30 +164,19 @@ class MainActivity : AppCompatActivity() {
                 setTextColor(ContextCompat.getColor(context, R.color.white))
                 textSize = 14f
             }
-            innerLayout.addView(
-                tutorialTextView,
-                LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                )
-            )
+            innerLayout.addView(tutorialTextView, LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+
             // Adds the inner to outer layout!!
-            outerLayout.addView(
-                innerLayout,
-                LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                )
-            )
+            outerLayout.addView(innerLayout, LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+
             // Create the popup window
             val popupWidthDp = 300
             val popupWidthPx = (popupWidthDp * resources.displayMetrics.density).toInt()
 
-            val popupWindow = PopupWindow(
-                outerLayout,
-                popupWidthPx,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                true
+            val popupWindow = PopupWindow(outerLayout, popupWidthPx,
+                ViewGroup.LayoutParams.WRAP_CONTENT, true
             )
 
             // Makes the touches work
@@ -198,6 +187,7 @@ class MainActivity : AppCompatActivity() {
             popupWindow.setOnDismissListener {
                 Log.w("MainActivity", "Tutorial popup dismissed")
             }
+
             // centers the popup
             val rootView = findViewById<View>(R.id.home_root)
             popupWindow.showAtLocation(rootView, Gravity.CENTER, 0, -510)

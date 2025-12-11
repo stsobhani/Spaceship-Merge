@@ -77,6 +77,7 @@ class LeaderboardActivity : AppCompatActivity() {
             leftMargin = dpToPx(24)
             rightMargin = dpToPx(24)
         }
+
         // Creates the ten rows
         for (i in 1..NUM_SLOTS) {
             val rowTextView = TextView(this).apply {
@@ -85,35 +86,19 @@ class LeaderboardActivity : AppCompatActivity() {
                 textSize = 16f
                 setPadding(dpToPx(16), dpToPx(12), dpToPx(16), dpToPx(12))
                 gravity = Gravity.CENTER_VERTICAL
-                setTextColor(
-                    ContextCompat.getColor(
-                        this@LeaderboardActivity,
-                        R.color.white
-                    )
-                )
+                setTextColor(ContextCompat.getColor(this@LeaderboardActivity, R.color.white))
+
                 // Uses earlier font
-                typeface = ResourcesCompat.getFont(
-                    this@LeaderboardActivity,
-                    R.font.space_grotesk_medium
-                )
+                typeface = ResourcesCompat.getFont(this@LeaderboardActivity, R.font.space_grotesk_medium)
+
                 // Creates the rectangle background
                 background = GradientDrawable().apply {
-                    setColor(
-                        ContextCompat.getColor(
-                            this@LeaderboardActivity,
-                            R.color.turquoise
-                        )
-                    )
+                    setColor(ContextCompat.getColor(this@LeaderboardActivity, R.color.turquoise))
+
                     // Makes the corners rounded
                     cornerRadius = dpToPx(16).toFloat()
                     // Makes red border to look nice!!
-                    setStroke(
-                        dpToPx(2),
-                        ContextCompat.getColor(
-                            this@LeaderboardActivity,
-                            R.color.red
-                        )
-                    )
+                    setStroke(dpToPx(2), ContextCompat.getColor(this@LeaderboardActivity, R.color.red))
                 }
             }
             // Adds row to container
