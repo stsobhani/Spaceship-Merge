@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "298137825592",
+    "project_id": "spaceshipdatabase-b699b",
+    "storage_bucket": "spaceshipdatabase-b699b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:298137825592:android:81f6daa93bc7fa40a611cd",
+        "android_client_info": {
+          "package_name": "com.example.spaceship_merge"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmGVdv-JPbwvQ2kuCtA2sGv0SA9DgAyLc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
