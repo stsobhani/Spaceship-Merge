@@ -132,7 +132,7 @@ class MainActivity : AppCompatActivity() {
             // Build content view for the popup
             val context = this
 
-            // Outer container (for red border)
+            // Create red border
             val outerLayout = LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
                 setPadding(8, 8, 8, 8) // border thickness
@@ -144,7 +144,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            // Inner layout (turquoise background)
+            // Main area
             val innerLayout = LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
                 setPadding(32, 32, 32, 32)
@@ -165,8 +165,6 @@ class MainActivity : AppCompatActivity() {
                         "• Don’t let the board get too full!"
                 setTextColor(ContextCompat.getColor(context, R.color.white))
                 textSize = 14f
-                // If you want your retro font:
-                // typeface = ResourcesCompat.getFont(context, R.font.press_start_2p)
             }
 
             innerLayout.addView(
