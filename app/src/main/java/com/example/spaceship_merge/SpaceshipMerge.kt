@@ -2,6 +2,7 @@ package com.example.spaceship_merge
 
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
+import android.graphics.Bitmap
 import android.graphics.RectF
 import android.util.Log
 import android.widget.Space
@@ -9,6 +10,7 @@ import android.widget.Toast
 import com.example.spaceship_merge.MainActivity.Companion.HIGH_SCORE_KEY
 import com.example.spaceship_merge.MainActivity.Companion.PREFS_NAME
 import kotlin.collections.mutableListOf
+import kotlin.collections.mutableMapOf
 import kotlin.collections.remove
 
 // The game logic that manages the behaviors, scoring, and rules
@@ -47,13 +49,16 @@ class SpaceshipMerge {
     private var context : Context
     // the hieght of the top score bar
     private val topBarHeight : Int
+
+    private var shipBitmaps = mutableMapOf<Int, Bitmap>()
     // Initialises the game with dimensions and makes the grid
-    constructor(width : Int, height : Int, topBarHeight: Int, context : Context){
+    constructor(width : Int, height : Int, topBarHeight: Int, shipBitmaps: MutableMap<Int, Bitmap>, context : Context){
         this.width = width
         this.height = height
         this.topBarHeight = topBarHeight
         this.launchPosition = Pair<Float, Float>(width/2f, height - 200f)
         this.context = context
+        this.shipBitmaps = shipBitmaps
 
         shipBaseSize = width * .1f
 
@@ -92,8 +97,22 @@ class SpaceshipMerge {
         if(launchReady) return
         // Calculates the size on tier
         val scale = Math.pow(shipScale, (tier - 1.0)).toFloat()
-        val shipWidth = (shipBaseSize * scale)
-        val shipHeight = (shipBaseSize * scale)
+
+        val bitmap = shipBitmaps[tier] ?: return
+
+        val aspectRatio = bitmap.width.toFloat() / bitmap.height
+
+        val targetSize = shipBaseSize * scale
+
+        //Determine properly scaled ship width and height
+        val (shipWidth, shipHeight) = if(aspectRatio >= 1f){
+            //Image is wider than it is tall, match width to target size, scale down the height
+            targetSize to (targetSize/aspectRatio)
+        }else{
+            //Image is taller than it is wide, match height to target size, scale down the width
+            (targetSize * aspectRatio) to targetSize
+        }
+
         // If largest ship, rebuilds the grid!
         if(tier > currentMaxTier){
             currentMaxTier = tier
@@ -228,8 +247,20 @@ class SpaceshipMerge {
 
         val scale = Math.pow(shipScale, (tier - 1.0)).toFloat()
 
-        val shipWidth = (shipBaseSize * scale)
-        val shipHeight = (shipBaseSize * scale)
+        val bitmap = shipBitmaps[tier] ?: return
+
+        val aspectRatio = bitmap.width.toFloat() / bitmap.height
+
+        val targetSize = shipBaseSize * scale
+
+        //Determine properly scaled ship width and height
+        val (shipWidth, shipHeight) = if(aspectRatio >= 1f){
+            //Image is wider than it is tall, match width to target size, scale down the height
+            targetSize to (targetSize/aspectRatio)
+        }else{
+            //Image is taller than it is wide, match height to target size, scale down the width
+            (targetSize * aspectRatio) to targetSize
+        }
 
         val mergedShip = Spaceship(nextShipId, mergedX, y = mergedY, mergedVelocityX, mergedVelocityY,shipWidth, shipHeight, tier, 0f, true, true, true)
         nextShipId += 1
@@ -548,9 +579,24 @@ class SpaceshipMerge {
             y - height / 2f,
             x + width / 2f,
             y + height / 2f
-        )
-    ){
-    }
+        )) {
+            fun getHitbox(): RectF {
+//                val bodyWidth = (rect.width() * 0.45f).toInt()
+//                val bodyHeight = (rect.height() * 0.75f).toInt()
+//
+//                val centerX = rect.centerX()
+//                val top = rect.top + (rect.height() * 0.1f).toInt()
+//
+//                return RectF(
+//                    centerX - bodyWidth / 2,
+//                    top,
+//                    centerX + bodyWidth / 2,
+//                    top + bodyHeight
+//                )
+                return rect
+            }
+        }
+
 
     // Defines one cell in collision.
     class GridCell(

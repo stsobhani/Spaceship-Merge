@@ -46,16 +46,81 @@ class GameView : View {
         // loads the ship tiers
         loadShipImages()
         // initializes the game logic with dimensions
-        spaceshipMerge = SpaceshipMerge(this.width, this.height, this.topBarHeight, context)
+        spaceshipMerge = SpaceshipMerge(this.width, this.height, this.topBarHeight,shipBitmaps, context)
     }
     // Loads the ship bitmap images from the drawable resources!
     private fun loadShipImages() {
 
         for(i in 0..numTiers) {
             val resourceId = resources.getIdentifier("ship$i", "drawable", context.packageName)
-            shipBitmaps[i] = BitmapFactory.decodeResource(resources, resourceId)
+
+            val raw = BitmapFactory.decodeResource(resources, resourceId)
+
+            shipBitmaps[i] = trimTransparent(raw)
         }
     }
+
+    //Trims unnecessary transparent padding from bitmaps to help create tighter hitboxes
+    fun trimTransparent(bitmap : Bitmap) : Bitmap {
+        val width = bitmap.width
+        val height = bitmap.height
+
+        var top = 0
+        var left = 0
+        var right = width - 1
+        var bottom = height - 1
+
+        val colOfPixels = IntArray(width)
+        val rowOfPixels = IntArray(height)
+
+        //Find top (first non-transparent pixel)
+        loop@ for(y in 0..height - 1){
+            bitmap.getPixels(colOfPixels, 0, width, 0, y, width, 1)
+            for(pixel in colOfPixels){
+                if(pixel ushr 24 != 0){
+                    top = y
+                    break@loop
+                }
+            }
+        }
+
+        //Find bottom (first non-transparent pixel)
+        loop@ for(y in height - 1 downTo top){
+            bitmap.getPixels(colOfPixels, 0, width, 0, y, width, 1)
+            for(pixel in colOfPixels){
+                if(pixel ushr 24 != 0){
+                    bottom = y
+                    break@loop
+                }
+            }
+        }
+
+        //Find left (first non-transparent pixel)
+        loop@ for(x in 0..width - 1){
+            bitmap.getPixels(rowOfPixels, 0, 1, x, 0, 1, height)
+            for(pixel in rowOfPixels){
+                if(pixel ushr 24 != 0){
+                    left = x
+                    break@loop
+                }
+            }
+        }
+
+        //Find right (first non-transparent pixel)
+        loop@ for(x in width - 1 downTo left){
+            bitmap.getPixels(rowOfPixels, 0, 1, x, 0, 1, height)
+            for(pixel in rowOfPixels){
+                if(pixel ushr 24 != 0){
+                    right = x
+                    break@loop
+                }
+            }
+        }
+
+        return Bitmap.createBitmap(bitmap, left, top, right - left + 1, bottom - top + 1)
+
+    }
+
     // Called whenever the view needs to be redrawn
     override fun onDraw(canvas : Canvas) {
         super.onDraw(canvas)
@@ -87,6 +152,12 @@ class GameView : View {
 
         canvas.drawLine(0f, height/2f, width.toFloat(), height/2f, linePaint)
 
+        val debugPaint = Paint().apply {
+            style = Paint.Style.STROKE
+            color = Color.RED
+            strokeWidth = 3f
+        }
+
         //Retrieve all ships in the current state of the game
         val ships = spaceshipMerge.getShips()
 
@@ -96,6 +167,10 @@ class GameView : View {
             if(!ship.visible) continue
             val bitmap = shipBitmaps[ship.tier] ?: continue
             canvas.drawBitmap(bitmap, null, ship.rect, paint)
+
+            //Draw hitbox
+//            canvas.drawRect(ship.getHitbox(), debugPaint)
+
         }
     }
     //Provides access to logic controller
