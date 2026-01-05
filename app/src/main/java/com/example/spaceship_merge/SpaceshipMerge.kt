@@ -375,6 +375,32 @@ class SpaceshipMerge {
         )
     }
 
+    fun getShipToLaunch() : Spaceship?{
+        return shipToLaunch
+    }
+
+    fun moveShipToLaunch(x : Float){
+        val ship = shipToLaunch ?: return
+
+        ship.x = x
+
+        // left boundary!
+        if(ship.x - ship.width/2f < 0f){
+            ship.x = ship.width/2f
+        }
+        // right boundary!
+        if(ship.x + ship.width/2f > width){
+            ship.x = width - ship.width/2f
+        }
+        // updating the bounding rectangle
+        ship.rect.set(
+            ship.x - ship.width / 2f,
+            ship.y - ship.height / 2f,
+            ship.x + ship.width / 2f,
+            ship.y + ship.height / 2f
+        )
+    }
+
     // Launches the current spaceship
     fun launch(){
         val ship = shipToLaunch ?: return

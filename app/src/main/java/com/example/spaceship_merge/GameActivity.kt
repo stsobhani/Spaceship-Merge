@@ -71,6 +71,9 @@ class GameActivity : AppCompatActivity() {
         gameTimer = Timer()
         gameTimer.schedule(task, 0L, GameView.DELTA_TIME)
     }
+
+    private var touchOffsetX = 0f
+
     // Handles the touch gestures like scrolling!!
     inner class TouchHandler : GestureDetector.SimpleOnGestureListener(){
         override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
@@ -85,8 +88,7 @@ class GameActivity : AppCompatActivity() {
         ): Boolean {
             // Allows dragging if ship ready to launch only
             if(spaceshipMerge.readyToLaunch()){
-                //Move the launch shift left and right
-                spaceshipMerge.dragShip(-distanceX)
+                spaceshipMerge.moveShipToLaunch(e2.x)
                 return true
             }
             return false
@@ -97,12 +99,27 @@ class GameActivity : AppCompatActivity() {
         if (!gameInProgress) return true
 
         if (event != null) {
-            //lets the gesture process event first
-            detector.onTouchEvent(event)
+
+            if(event.action == MotionEvent.ACTION_DOWN){
+                if(spaceshipMerge.readyToLaunch()) {
+                    spaceshipMerge.moveShipToLaunch(event.x)
+                }
+            }
+
+            if(event.action == MotionEvent.ACTION_MOVE){
+                if(spaceshipMerge.readyToLaunch()) {
+                    spaceshipMerge.moveShipToLaunch(event.x)
+                }
+            }
+
             // if person lifts off mouse, the spaceship flies off
             if(event.action == MotionEvent.ACTION_UP){
                 spaceshipMerge.launch()
+                touchOffsetX = 0f
             }
+
+            //Process finger dragging motion
+            //detector.onTouchEvent(event)
         }
         return true
     }
