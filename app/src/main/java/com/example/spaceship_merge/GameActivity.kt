@@ -21,6 +21,9 @@ import com.google.firebase.database.ValueEventListener
 import com.example.spaceship_merge.MainActivity.Companion.PREFS_NAME
 import com.example.spaceship_merge.MainActivity.Companion.USERNAME_KEY
 import com.example.spaceship_merge.MainActivity.Companion.HIGH_SCORE_KEY
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+
 
 class GameActivity : AppCompatActivity() {
     // The custom view that shows graphics
@@ -224,78 +227,63 @@ class GameActivity : AppCompatActivity() {
     }
     // Updates the leaderboard if in top 10
     private fun updateLeaderboardIfTop10(score: Int) {
-        Log.w("GameActivity", "In the leaderboard update fn, score = $score")
-        // Gets the username from the preferences
+        Log.w("GameActivity", "Updating leaderboard with score=$score")
+
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
         val username = prefs.getString(USERNAME_KEY, "Player") ?: "Player"
-        // If username is blank, does not update
+
         if (username.isBlank()) {
             Log.w("GameActivity", "Username blank, skipping leaderboard")
             return
         }
-        // Gets the database reference to the leaderboard
-        val db = FirebaseDatabase.getInstance()
-        val leaderboardRef = db.getReference("leaderboard")
-        // Reads the current leaderboard data
-        leaderboardRef.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
 
-                // Reads the ten usernames and scores
-                val usernames = MutableList(10) { i ->
-                    snapshot.child("username${i + 1}")
-                        .getValue(String::class.java) ?: "***"
-                }
+        val db = FirebaseFirestore.getInstance()
+        val leaderboardRef = db.collection("leaderboard")
 
-                val scores = MutableList(10) { i ->
-                    snapshot.child("score${i + 1}")
-                        .getValue(Int::class.java) ?: 0
-                }
+        // Get current top 10 (lowest last)
+        leaderboardRef
+            .orderBy("score", Query.Direction.DESCENDING)
+            .limit(10)
+            .get()
+            .addOnSuccessListener { snapshot ->
 
-                Log.w("GameActivity", "Current leaderboard usernames=$usernames scores=$scores")
+                // If leaderboard has less than 10 entries OR score beats lowest
+                val lowestScore =
+                    snapshot.documents.lastOrNull()?.getLong("score") ?: -1
 
-                // Find insert position
-                var insertPos = -1
-                for (i in 0 until 10) {
-                    if (score > scores[i]) {
-                        insertPos = i
-                        break
+                if (snapshot.size() < 10 || score > lowestScore) {
+
+                    // Add new score (this auto-creates the collection if empty)
+                    leaderboardRef.add(
+                        mapOf(
+                            "username" to username,
+                            "score" to score
+                        )
+                    ).addOnSuccessListener {
+                        Log.w("GameActivity", "Score added to leaderboard")
+
+                        // Trim leaderboard to top 10
+                        leaderboardRef
+                            .orderBy("score", Query.Direction.DESCENDING)
+                            .limit(11)
+                            .get()
+                            .addOnSuccessListener { trimSnapshot ->
+                                if (trimSnapshot.size() > 10) {
+                                    trimSnapshot.documents.last().reference.delete()
+                                }
+                            }
+
+                    }.addOnFailureListener { e ->
+                        Log.w("GameActivity", "Failed to add score", e)
                     }
-                }
-                // The score did not make the top 10
-                if (insertPos == -1) {
-                    Log.w("GameActivity", "Score not in top 10 so no update")
-                    return
-                }
-                // Shift down scores to make room
-                for (i in 9 downTo insertPos + 1) {
-                    usernames[i] = usernames[i - 1]
-                    scores[i] = scores[i - 1]
-                }
-                // Put snew score at right place
-                usernames[insertPos] = username
-                scores[insertPos] = score
 
-                Log.w("GameActivity", "New leaderboard usernames=$usernames scores=$scores")
-                // Builds the update map
-                val updates = HashMap<String, Any>()
-                for (i in 0 until 10) {
-                    val idx = i + 1
-                    updates["username$idx"] = usernames[i]
-                    updates["score$idx"] = scores[i]
+                } else {
+                    Log.w("GameActivity", "Score not high enough for leaderboard")
                 }
-                // Writes the updates at once to the firebase
-                leaderboardRef.updateChildren(updates)
-                    .addOnSuccessListener {
-                        Log.w("GameActivity", "Leaderboard update success!!")
-                    }
-                    .addOnFailureListener { e ->
-                        Log.w("GameActivity", "Leaderboard update failed!!", e)
-                    }
             }
-            // Statement to see if cancelled
-            override fun onCancelled(error: DatabaseError) {
-                Log.w("GameActivity", "Leaderboard read cancelled: ${error.message}")
+            .addOnFailureListener { e ->
+                Log.w("GameActivity", "Failed to read leaderboard", e)
             }
-        })
     }
+
 }

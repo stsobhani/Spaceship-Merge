@@ -14,6 +14,11 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+
+
 // The activity which displays the top ten highest scores using firebase!
 class LeaderboardActivity : AppCompatActivity() {
 
@@ -43,28 +48,54 @@ class LeaderboardActivity : AppCompatActivity() {
         // Creates the ten boxes
         createRows()
 
-        // Learned in class, how to use the firebase!
-        val db = FirebaseDatabase.getInstance()
-        val leaderboardRef = db.getReference("leaderboard")
-        // Adds the listner which updates the UI whenever data changes
-        leaderboardRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                // Updates the leaderboard position
-                for (i in 1..NUM_SLOTS) {
-                    // Reads the username and score
-                    val username = snapshot.child("username$i")
-                        .getValue(String::class.java) ?: "***"
-                    val score = snapshot.child("score$i")
-                        .getValue(Int::class.java) ?: 0
-                    // This updates the TextView with the formatted text!
-                    rowViews[i - 1].text = formatRow(i, username, score)
+        // Firestore instance
+        val db = FirebaseFirestore.getInstance()
+
+        // Adds the listener which updates the UI whenever data changes
+//        leaderboardRef.addValueEventListener(object : ValueEventListener {
+//            override fun onDataChange(snapshot: DataSnapshot) {
+//                // Updates the leaderboard position
+//                for (i in 1..NUM_SLOTS) {
+//                    // Reads the username and score
+//                    val username = snapshot.child("username$i")
+//                        .getValue(String::class.java) ?: "***"
+//                    val score = snapshot.child("score$i")
+//                        .getValue(Int::class.java) ?: 0
+//                    // This updates the TextView with the formatted text!
+//                    rowViews[i - 1].text = formatRow(i, username, score)
+//                }
+//            }
+//            // Used to help debug:)
+//            override fun onCancelled(error: DatabaseError) {
+//                Log.w(TAG, "Failed to read leaderboard: ${error.message}")
+//            }
+//        })
+
+        db.collection("leaderboard")
+            .orderBy("score", Query.Direction.DESCENDING)
+            .limit(NUM_SLOTS.toLong())
+            .addSnapshotListener { snapshot, error ->
+
+                if (error != null) {
+                    Log.w(TAG, "Failed to read leaderboard", error)
+                    return@addSnapshotListener
+                }
+
+                // Clear rows first (handles empty leaderboard)
+                for (i in 0 until NUM_SLOTS) {
+                    rowViews[i].text = formatRow(i + 1, "***", 0)
+                }
+
+                if (snapshot == null) return@addSnapshotListener
+
+                for ((index, doc) in snapshot.documents.withIndex()) {
+                    val username = doc.getString("username") ?: "***"
+                    val score = doc.getLong("score")?.toInt() ?: 0
+
+                    rowViews[index].text = formatRow(index + 1, username, score)
                 }
             }
-            // Used to help debug:)
-            override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "Failed to read leaderboard: ${error.message}")
-            }
-        })
+
     }
     // Creates the ten textviews to display leaderboard entries!
     private fun createRows() {
