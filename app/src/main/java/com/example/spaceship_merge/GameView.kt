@@ -21,7 +21,7 @@ class GameView : View {
     // The main game logic controller
     private val spaceshipMerge : SpaceshipMerge
 
-    // Maps spaceship tier numbers to corrresponding bitmaps
+    // Maps spaceship tier numbers to corresponding bitmaps
     private val shipBitmaps = mutableMapOf<Int, Bitmap>()
     // The original background image
     private val background = BitmapFactory.decodeResource(resources, R.drawable.space_background)
@@ -29,7 +29,7 @@ class GameView : View {
     private val scaledBackground : Bitmap
     private var screenHeight : Int = 0
     private var screenWidth : Int = 0
-    // Hieght of top score bar
+    // Height of top score bar
     val topBarHeight : Int = 150
     // This initialises the game view with the dimensions
     constructor(context : Context, width : Int, height : Int) : super(context){

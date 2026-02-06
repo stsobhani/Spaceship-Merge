@@ -39,15 +39,15 @@ class SpaceshipMerge {
 
     //If stickyMode is true the ships stick to the boundaries
     private var stickyMode : Boolean = false
-    // Tracks highest tier ship which apeared
+    // Tracks highest tier ship which appeared
     private var currentMaxTier = 0
     // Grid to put into cells
     private var grid : Array<Array<GridCell>>
     // assigns id to each ship
     private var nextShipId : Int = 0
-    // Acessing the shared preferences
+    // Accessing the shared preferences
     private var context : Context
-    // the hieght of the top score bar
+    // the height of the top score bar
     private val topBarHeight : Int
 
     private var shipBitmaps = mutableMapOf<Int, Bitmap>()
@@ -174,11 +174,11 @@ class SpaceshipMerge {
         return true
     }
 
-    //Returns whether game eneded
+    //Returns whether game ended
     fun isGameOver() : Boolean{
         return gameOver
     }
-    // Updates high schore in shared preferences if current score is higher
+    // Updates high score in shared preferences if current score is higher
     fun updateHighScore(): Int {
         if (!gameOver) return 0
 
@@ -205,10 +205,10 @@ class SpaceshipMerge {
     }
     // Builds the grid of cells which covers antigravity zone
     private fun buildGrid(cellSize : Float) : Array<Array<GridCell>>{
-        // Calculates number of colums and rows fit in antigravity zone
+        // Calculates number of columns and rows fit in antigravity zone
         val numGridCols = (width/cellSize).toInt() + 1
         val numGridRows = ((height/2)/cellSize).toInt() + 1
-        // calcualtes actuall cell dimensions to fill space
+        // calculates actual cell dimensions to fill space
         val cellWidth = width/numGridCols.toFloat()
         val cellHeight = height/numGridRows.toFloat()
 
@@ -264,7 +264,7 @@ class SpaceshipMerge {
 
         val mergedShip = Spaceship(nextShipId, mergedX, y = mergedY, mergedVelocityX, mergedVelocityY,shipWidth, shipHeight, tier, 0f, true, true, true)
         nextShipId += 1
-        // Updates the rectanle of the ship
+        // Updates the rectangle of the ship
         mergedShip.rect.set(
             mergedShip.x - mergedShip.width/2f,
             mergedShip.y - mergedShip.height/2f,
@@ -455,7 +455,7 @@ class SpaceshipMerge {
                     ship.velocityX *= -1
                 }
 
-                // handles colision with top bottom boundaries
+                // handles collision with top bottom boundaries
                 if(ship.antiGravity && (ship.y - ship.height/2f < topBarHeight || ship.y + ship.height/2f > height/2f )) {
                     ship.velocityY *= -1
                 }
@@ -494,7 +494,7 @@ class SpaceshipMerge {
                 val maxY = height/2f - ship.height/2f
                 val minX = ship.width/2f
                 val maxX = width - ship.width/2f
-                // this stops y position and velocity for stickyy
+                // this stops y position and velocity for sticky
                 if(ship.y < minY){
                     ship.y = minY
                     if(stickyMode) ship.velocityY = 0f

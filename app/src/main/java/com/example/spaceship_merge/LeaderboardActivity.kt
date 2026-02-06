@@ -27,7 +27,7 @@ class LeaderboardActivity : AppCompatActivity() {
         private const val NUM_SLOTS = 10
         private const val TAG = "LeaderboardActivity"
     }
-    // holds all the leadarboard rows
+    // holds all the leaderboard rows
     private lateinit var leaderboardContainer: LinearLayout
     // Lists the TextViews for each leaderboard position
     private val rowViews = mutableListOf<TextView>()
@@ -50,27 +50,6 @@ class LeaderboardActivity : AppCompatActivity() {
 
         // Firestore instance
         val db = FirebaseFirestore.getInstance()
-
-        // Adds the listener which updates the UI whenever data changes
-//        leaderboardRef.addValueEventListener(object : ValueEventListener {
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//                // Updates the leaderboard position
-//                for (i in 1..NUM_SLOTS) {
-//                    // Reads the username and score
-//                    val username = snapshot.child("username$i")
-//                        .getValue(String::class.java) ?: "***"
-//                    val score = snapshot.child("score$i")
-//                        .getValue(Int::class.java) ?: 0
-//                    // This updates the TextView with the formatted text!
-//                    rowViews[i - 1].text = formatRow(i, username, score)
-//                }
-//            }
-//            // Used to help debug:)
-//            override fun onCancelled(error: DatabaseError) {
-//                Log.w(TAG, "Failed to read leaderboard: ${error.message}")
-//            }
-//        })
-
         db.collection("leaderboard")
             .orderBy("score", Query.Direction.DESCENDING)
             .limit(NUM_SLOTS.toLong())
@@ -99,7 +78,7 @@ class LeaderboardActivity : AppCompatActivity() {
     }
     // Creates the ten textviews to display leaderboard entries!
     private fun createRows() {
-        // Sets the layour parameters
+        // Sets the layout parameters
         val layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT

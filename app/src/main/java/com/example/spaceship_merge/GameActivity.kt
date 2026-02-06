@@ -132,7 +132,7 @@ class GameActivity : AppCompatActivity() {
         gameTimer.cancel()
         gameTimer.purge()
         gameInProgress = false
-        // Gets previous high schore from the shared preferences
+        // Gets previous high score from the shared preferences
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
         val oldHigh : Int = prefs.getInt(HIGH_SCORE_KEY, 0)
         // Update and gets new high score
@@ -158,7 +158,7 @@ class GameActivity : AppCompatActivity() {
             endGame()
             return
         }
-        // update the ship poisitions
+        // update the ship positions
         gameView.getSpaceshipMerge().moveShips()
         // checks to see if collisions between the spaceships
         gameView.getSpaceshipMerge().checkCollisions()

@@ -86,7 +86,7 @@ class MainActivity : AppCompatActivity() {
             usernameText.text = "Username: $savedUsername"
         }
 
-        // Setsup the banner ad
+        // Sets up the banner ad
         val adContainer = findViewById<FrameLayout>(R.id.ad_container)
 
         // The test ad!!
@@ -220,7 +220,7 @@ class MainActivity : AppCompatActivity() {
                 if (name.isEmpty()) input.error = "Username cannot be empty"
                 else if (name.length > USERNAME_MAX_LEN) input.error = "Must be $USERNAME_MAX_LEN characters or less"
 
-                // Ssername is good!
+                // Username is good!
                 else {
                     // Saves the username to shared preferences
                     prefs.edit().putString(USERNAME_KEY, name).apply()
